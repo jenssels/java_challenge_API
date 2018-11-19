@@ -1,0 +1,38 @@
+Routes:
+
+GET 'API_URL/users':
+    return: array van alle users
+
+GET 'API_URL/users/{ID}':
+    ID: id van user,
+    return: user
+
+POST 'API_URL/users':
+    POST_Body: {
+        naam,
+        email,
+        wachtwoord,
+        adminNiveau
+    },
+    return: Toegevoegde gebruiker;
+
+POST 'API_URL/users/login':
+    POST_Body:{
+        email,
+        wachtwoord
+    }
+    return: user als email en wachtwoord overeenkomen
+
+PUT 'API_URL/users/{ID}'
+    ID: id van user,
+    POST_Body: {
+        naam,
+        email,
+        wachtwoord,
+        adminNiveau
+    }
+    return: 'OK' indien succesvol
+
+DELETE 'API_URL/users/{ID}':
+    ID: id van user,
+    return: 'User {ID} deleted!' indien succesvol
