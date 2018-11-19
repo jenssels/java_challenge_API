@@ -1,4 +1,4 @@
-Routes:
+Users:
 
 GET 'API_URL/users':
     return: array van alle users
