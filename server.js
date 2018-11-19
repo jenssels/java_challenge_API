@@ -15,6 +15,12 @@ const connectToMongo = async() => {
 
     let db = await client.db('java-api');
 
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
     require('./app/routes')(app, db);
 
     await app.listen(port, () => {

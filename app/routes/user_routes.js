@@ -6,7 +6,7 @@ module.exports = function(app, db) {
     app.delete('/users/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
-        db.collection('users').remove(details, (err, item) => {
+        db.collection('users').deleteOne(details, (err, item) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -20,7 +20,7 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         const user = { naam: req.body.naam, email: req.body.email, wachtwoord: req.body.wachtwoord, adminNiveau: req.body.adminNiveau };
-        db.collection('users').update(details, user, (err, result) => {
+        db.collection('users').updateOne(details, user, (err, result) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {

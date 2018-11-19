@@ -48,9 +48,9 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         const opdrachtType = { naam: req.body.naam, aantalPunten: req.body.aantalPunten  };
-        db.collection('opdrachtType').update(details, opdrachtType, (err, result) => {
+        db.collection('opdrachtType').updateOne(details, opdrachtType, (err, result) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred' + err});
             } else {
                 res.send('OK');
             }
@@ -98,7 +98,7 @@ module.exports = function(app, db) {
     app.delete('/opdrachtTypes/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
-        db.collection('opdrachtType').remove(details, (err, item) => {
+        db.collection('opdrachtType').deleteOne(details, (err, item) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
