@@ -1,14 +1,36 @@
 const ObjectId       = require('mongodb').ObjectID;
+const config         = require('../../config/config');
+const jwt            = require('jsonwebtoken');
 
 module.exports = function(app, db) {
-    // Jens Sels - Ophalen van alle opdrachten
-    app.get('/opdrachten/', (req, res) => {
-        const params = {};
-        if (req.query.isGoedgekeurd != null){
-            params['isGoedgekeurd'] =  req.query.isGoedgekeurd;
-        }
-        console.log(params);
-        db.collection('opdracht').find(params).sort({datumInzending: -1} ).toArray((err, items) => {
+
+    // Jens Sels - Middleware die checkt of er een valid token is meegegeven
+    app.use(function(req, res, next) {
+        const token = req.headers['x-access-token'];
+        if (!token) return res.status(401).send({ message: 'No token provided.' });
+
+        jwt.verify(token, config.secret, function(err, decoded) {
+            if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
+        });
+        next();
+    });
+
+    // Jens Sels - Ophalen van opdracht where id
+    app.get('/opdrachten/:id', (req, res) => {
+        const id = req.params.id;
+        const details = { '_id': new ObjectId(id) };
+        db.collection('opdracht').findOne(details, (err, item) => {
+            if (err) {
+                res.send({'error':'An error has occurred ' + err});
+            } else {
+                res.send(item);
+            }
+        });
+    });
+
+    // Jens Sels - Ophalen van alle opdracht types
+    app.get('/opdrachtTypes/', (req, res) => {
+        db.collection('opdrachtType').find({}).toArray((err, items) => {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
@@ -17,11 +39,11 @@ module.exports = function(app, db) {
         });
     });
 
-    // Jens Sels - Ophalen van opdracht where id
-    app.get('/opdrachten/:id', (req, res) => {
+    // Jens Sels - Ophalen van een opdracht type
+    app.get('/opdrachtTypes/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
-        db.collection('opdracht').findOne(details, (err, item) => {
+        db.collection('opdrachtType').findOne(details, (err, item) => {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
@@ -41,6 +63,38 @@ module.exports = function(app, db) {
             }
         });
     });
+
+
+    // Jens Sels - Middleware die checkt of de gebruiker genoeg permissions heeft
+    app.use(function(req, res, next) {
+        const token = req.headers['x-access-token'];
+        jwt.verify(token, config.secret, function(err, decoded) {
+            if (parseInt(decoded.adminNiveau) < 1) {
+                return res.status(403).send({message: 'Access denied, permission not high enough.'});
+            }
+            else{
+                next();
+            }
+        });
+    });
+
+
+    // Jens Sels - Ophalen van alle opdrachten
+    app.get('/opdrachten/', (req, res) => {
+        const params = {};
+        if (req.query.isGoedgekeurd != null){
+            params['isGoedgekeurd'] =  req.query.isGoedgekeurd;
+        }
+        console.log(params);
+        db.collection('opdracht').find(params).sort({datumInzending: -1} ).toArray((err, items) => {
+            if (err) {
+                res.send({'error':'An error has occurred ' + err});
+            } else {
+                res.send(items);
+            }
+        });
+    });
+    
 
     // Jens Sels - Bewerken van opdracht
     app.put('/opdrachten/:id', (req, res) => {
@@ -128,29 +182,6 @@ module.exports = function(app, db) {
         });
     });
 
-    // Jens Sels - Ophalen van alle opdracht types
-    app.get('/opdrachtTypes/', (req, res) => {
-        db.collection('opdrachtType').find({}).toArray((err, items) => {
-            if (err) {
-                res.send({'error':'An error has occurred ' + err});
-            } else {
-                res.send(items);
-            }
-        });
-    });
-
-    // Jens Sels - Ophalen van een opdracht type
-    app.get('/opdrachtTypes/:id', (req, res) => {
-        const id = req.params.id;
-        const details = { '_id': new ObjectId(id) };
-        db.collection('opdrachtType').findOne(details, (err, item) => {
-            if (err) {
-                res.send({'error':'An error has occurred ' + err});
-            } else {
-                res.send(item);
-            }
-        });
-    });
 
     // Jens Sels - Ophalen van alle opdrachten van een bepaalde opdracht Type
     app.get('/opdrachtTypes/:id/opdrachten', (req, res) => {

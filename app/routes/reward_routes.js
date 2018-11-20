@@ -1,6 +1,19 @@
 const ObjectId       = require('mongodb').ObjectID;
+const config         = require('../../config/config');
+const jwt            = require('jsonwebtoken');
 
 module.exports = function(app, db) {
+
+    // Jens Sels - Middleware die checkt of er een valid token is meegegeven
+    app.use(function(req, res, next) {
+        const token = req.headers['x-access-token'];
+        if (!token) return res.status(401).send({ message: 'No token provided.' });
+
+        jwt.verify(token, config.secret, function(err, decoded) {
+            if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
+        });
+        next();
+    });
 
     // Jens Sels - Ophalen van alle rewards
     app.get('/rewards/', (req, res) => {
@@ -34,6 +47,20 @@ module.exports = function(app, db) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send(item);
+            }
+        });
+    });
+
+
+    // Jens Sels - Middleware die checkt of de gebruiker genoeg permissions heeft
+    app.use(function(req, res, next) {
+        const token = req.headers['x-access-token'];
+        jwt.verify(token, config.secret, function(err, decoded) {
+            if (parseInt(decoded.adminNiveau) < 1) {
+                return res.status(403).send({message: 'Access denied, permission not high enough.'});
+            }
+            else{
+                next();
             }
         });
     });

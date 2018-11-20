@@ -5,6 +5,8 @@ const MongoClient    = require('mongodb').MongoClient;
 const bodyParser     = require('body-parser');
 const app            = express();
 const config         = require('./config/config');
+const jwt            = require('jsonwebtoken');
+const bcrypt         = require('bcryptjs');
 
 const allowCrossDomain = function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
