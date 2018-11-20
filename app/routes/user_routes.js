@@ -23,10 +23,10 @@ module.exports = function(app, db) {
         if (req.body.naam != null){
             params['naam'] = req.body.naam;
         }
-        if (req.body.email){
+        if (req.body.email != null){
             params['email'] = req.body.email;
         }
-        if (req.body.wachtwoord){
+        if (req.body.wachtwoord != null){
             params['wachtwoord'] = req.body.wachtwoord;
         }
         if (req.body.adminNiveau != null){

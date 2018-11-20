@@ -1,4 +1,4 @@
-Users:
+USERS:
 
 GET 'API_URL/users':
     return: array van alle users
@@ -6,6 +6,17 @@ GET 'API_URL/users':
 GET 'API_URL/users/{ID}':
     ID: id van user,
     return: user
+
+GET 'API_URL/users/{ID}/opdrachten'
+    ID: id van user,
+    query: {
+		isGoedgekeurd (true, false)
+    },
+    return: alle ingediende opdrachten van een user
+
+GET 'API_URL/users/{ID}/transacties'
+    ID: id van user,
+    return: alle gemaakte transacties van een user	
 
 POST 'API_URL/users':
     POST_Body: {
@@ -36,3 +47,144 @@ PUT 'API_URL/users/{ID}'
 DELETE 'API_URL/users/{ID}':
     ID: id van user,
     return: 'User {ID} deleted!' indien succesvol
+
+
+
+OPDRACHTEN:
+
+GET 'API_URL/opdrachten':
+    query{
+		isGoedgekeurd(true, false)
+    }
+    return: alle opdrachten
+
+GET 'API_URL/opdrachten/{ID}':
+    ID: id van opdracht,
+    return: opdracht
+
+POST 'API_URL/opdrachten':
+    POST_Body{
+		titel,
+		beschrijving,
+		datumInzending,
+		userId,
+		opdrachtTypeId,
+		aantalPunten,
+		isGoedgekeurd,
+		datumGoedgekeurd
+    },
+    return: toegevoegde opdracht
+	
+PUT 'API_URL/opdrachten/{ID}':
+	ID: id van opdracht,
+	POST_Body{
+		titel,
+		beschrijving,
+		datumInzending,
+		userId,
+		opdrachtTypeId,
+		aantalPunten,
+		isGoedgekeurd,
+		datumGoedgekeurd
+	},
+	return: 'OK' wanneer succesvol
+	
+DELETE 'API_URL/opdrachten/{ID}':
+	ID: id van opdracht,
+	return: 'Opdracht {ID} deleted!'
+	
+	
+GET 'API_URL/opdrachtTypes/{ID}':
+	ID: id van opdrachtType,
+	return: opdrachtType
+
+GET 'API_URL/opdrachtTypes':
+	return: alle opdrachtTypes
+	
+PUT 'API_URL/opdrachtTypes/{ID}':
+	ID: id van opdrachtType,
+	return: 'OK' indien succesvol
+	
+POST 'API_URL/opdrachtTypes':
+	POST_Body{
+		naam,
+		aantalPunten
+	}
+	return: toegevoegde opdrachtType
+
+DELETE 'API_URL/opdrachtTypes/{ID}':
+		ID: id van opdrachtType,
+		return: 'Opdracht type {ID} deleted!'
+		
+REWARDS:
+
+GET 'API_URL/rewards':
+	query{
+		orderBy(tabel naam),
+		orderDirection('ASC', 'DESC')
+	},
+	return: alle rewards
+	
+GET 'API_URL/rewards/{ID}':
+	ID: id van reward,
+	return: reward
+	
+POST 'API_URL/rewards':
+	POST_Body{
+		naam,
+		beschrijving,
+		aantalPunten,
+		fotoCode,
+		datum
+	},
+	return: toegevoegde reward
+	
+PUT 'API_URL/rewards':
+	POST_Body{
+		naam,
+		beschrijving,
+		aantalPunten,
+		fotoCode,
+		datum
+	},
+	return: 'OK' indien succesvol
+	
+DELETE 'API_URL/rewards/{ID}':
+	ID: id van reward,
+	return: 'Reward {ID} deleted!'
+	
+
+TRANSACTIES:
+
+GET 'API_URL/transacties':
+	query{
+		orderBy(tabel naam),
+		orderDirection('ASC', 'DESC')
+	},
+	return: alle transacties
+	
+GET 'API_URL/transacties/{ID}':
+	ID: id van transactie,
+	return: transactie
+
+POST 'API_URL/transacties':
+	POST_Body{
+		userId,
+		rewardId,
+		aantalPunten,
+		datum
+	}
+	return: toegevoegde transactie
+	
+PUT 'API_URL/transacties/{ID}':
+	POST_Body{
+		userId,
+		rewardId,
+		aantalPunten,
+		datum
+	}
+	return: 'OK' indien succesvol
+	
+DELETE 'API_URL/transacties/{ID}':
+	ID: id van transactie,
+	return: 'Transactie {ID} deleted!'
