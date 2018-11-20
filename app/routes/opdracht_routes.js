@@ -5,7 +5,7 @@ module.exports = function(app, db) {
     app.get('/opdrachten/', (req, res) => {
         const params = {};
         if (req.query.isGoedgekeurd != null){
-            params['isGoedgekeurd'] =  req.query.isGoedgekeurd === 'true';
+            params['isGoedgekeurd'] =  req.query.isGoedgekeurd;
         }
         console.log(params);
         db.collection('opdracht').find(params).sort({datumInzending: -1} ).toArray((err, items) => {
@@ -32,7 +32,7 @@ module.exports = function(app, db) {
 
     // Jens Sels - Opdracht toevoegen
     app.post('/opdrachten', (req, res) => {
-        const opdracht = { titel: req.body.titel, beschrijving: req.body.beschrijving, datumInzending: req.body.datumInzending, userId: req.body.userId, opdrachtTypeID: req.body.opdrachtTypeID, aantalPunten: req.body.aantalPunten, isGoedgekeurd: req.body.isGoedgekeurd, datumGoedgekeurd: req.body.datumGoedgekeurd };
+        const opdracht = { titel: req.body.titel, beschrijving: req.body.beschrijving, datumInzending: req.body.datumInzending, userId: req.body.userId, opdrachtTypeId: req.body.opdrachtTypeId, aantalPunten: req.body.aantalPunten, isGoedgekeurd: req.body.isGoedgekeurd, datumGoedgekeurd: req.body.datumGoedgekeurd };
         db.collection('opdracht').insertOne(opdracht, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred ' + err });

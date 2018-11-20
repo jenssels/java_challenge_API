@@ -60,7 +60,8 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const params = {'userId': id};
         if (req.query.isGoedgekeurd != null){
-            params['isGoedgekeurd'] =  req.query.isGoedgekeurd === 'true';
+            params['isGoedgekeurd'] =  req.query.isGoedgekeurd;
+            console.log(params);
         }
         db.collection('opdracht').find(params).sort({datumInzending: -1} ).toArray((err, items) => {
             if (err) {

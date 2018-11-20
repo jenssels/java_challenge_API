@@ -38,9 +38,9 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Transactie toevoegen
-    app.post('transacties', (req, res) => {
-        const reward = { userId: req.body.userId, rewardId: req.body.rewardId, aantalPunten: req.body.aantalPunten, datum: req.body.datum };
-        db.collection('transactie').insertOne(reward, (err, result) => {
+    app.post('/transacties/', (req, res) => {
+        const transactie = { userId: req.body.userId, rewardId: req.body.rewardId, aantalPunten: req.body.aantalPunten, datum: req.body.datum };
+        db.collection('transactie').insertOne(transactie, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred ' + err });
             } else {
