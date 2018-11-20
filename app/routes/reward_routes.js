@@ -1,9 +1,22 @@
 const ObjectId       = require('mongodb').ObjectID;
 
 module.exports = function(app, db) {
+
     // Jens Sels - Ophalen van alle rewards
     app.get('/rewards/', (req, res) => {
-        db.collection('reward').find({}).toArray((err, items) => {
+        const validOrderBy = ['naam', 'beschrijving', 'aantalPunten', 'fotoCode', 'datum'];
+        const validOrderDirection = ['ASC', 'DESC'];
+        const orderBy = req.query.orderBy;
+        const orderDirection = req.query.orderDirection;
+        const sort = {};
+        if (orderBy != null && orderDirection != null && validOrderBy.includes(orderBy) && validOrderDirection.includes(orderDirection)){
+            let richting = -1;
+            if (orderDirection === "ASC"){
+                richting = 1;
+            }
+            sort[orderBy] = richting;
+        }
+        db.collection('reward').find({}).sort(sort).toArray((err, items) => {
             if (err) {
                 res.send({'error':'An error has occurred: ' + err});
             } else {
@@ -27,7 +40,7 @@ module.exports = function(app, db) {
 
     // Jens Sels - Reward toevoegen
     app.post('/rewards', (req, res) => {
-        const reward = { naam: req.body.naam, beschrijving: req.body.beschrijving, aantalPunten: req.body.aantalPunten, fotoCode: req.body.fotoCode };
+        const reward = { naam: req.body.naam, beschrijving: req.body.beschrijving, aantalPunten: req.body.aantalPunten, fotoCode: req.body.fotoCode, datum: req.body.datum };
         db.collection('reward').insertOne(reward, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred ' + err });
@@ -53,6 +66,9 @@ module.exports = function(app, db) {
         }
         if (req.body.fotoCode != null){
             params['fotoCode'] = req.body.fotoCode;
+        }
+        if (req.body.datum != null){
+            params['datum'] = req.body.datum;
         }
 
         db.collection('reward').updateOne(details, {$set: params}, (err, result) => {

@@ -58,7 +58,11 @@ module.exports = function(app, db) {
     // Jens Sels - Ophalen van alle opdrachten van een user
     app.get('/users/:id/opdrachten', (req, res) => {
         const id = req.params.id;
-        db.collection('opdracht').find({'userId': id}).sort({datumInzending: -1} ).toArray((err, items) => {
+        const params = {'userId': id};
+        if (req.query.isGoedgekeurd != null){
+            params['isGoedgekeurd'] =  req.query.isGoedgekeurd === 'true';
+        }
+        db.collection('opdracht').find(params).sort({datumInzending: -1} ).toArray((err, items) => {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
@@ -106,4 +110,6 @@ module.exports = function(app, db) {
             }
         });
     });
+
+
 };
