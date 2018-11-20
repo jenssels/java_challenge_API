@@ -1,3 +1,7 @@
+TOKEN:
+   token moet worden meegegeven via de header('x-access-token')	
+
+
 USERS:
 
 GET 'API_URL/users':
@@ -32,7 +36,7 @@ POST 'API_URL/users/login':
         email,
         wachtwoord
     }
-    return: user als email en wachtwoord overeenkomen
+    return: token als email en wachtwoord overeenkomen
 
 PUT 'API_URL/users/{ID}'
     ID: id van user,

@@ -18,7 +18,7 @@ module.exports = function(app, db) {
                 const token = jwt.sign({ id: item._id, adminNiveau: item.adminNiveau }, config.secret, {
                     expiresIn: 86400
                 });
-                res.send({token: token});
+                res.send({token: token, user: item});
             }
         });
     });
