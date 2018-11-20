@@ -6,6 +6,13 @@ const bodyParser     = require('body-parser');
 const app            = express();
 const config         = require('./config/config');
 
+const allowCrossDomain = function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    next();
+};
+
 const port = 8081;
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,11 +22,7 @@ const connectToMongo = async() => {
 
     let db = await client.db('java-api');
 
-    app.use(function(req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        next();
-    });
+    app.use(allowCrossDomain);
 
     require('./app/routes')(app, db);
 

@@ -6,7 +6,7 @@ module.exports = function(app, db) {
     app.delete('/users/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
-        db.collection('users').deleteOne(details, (err, item) => {
+        db.collection('user').deleteOne(details, (err, item) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -20,7 +20,7 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         const user = { naam: req.body.naam, email: req.body.email, wachtwoord: req.body.wachtwoord, adminNiveau: req.body.adminNiveau };
-        db.collection('users').updateOne(details, user, (err, result) => {
+        db.collection('user').updateOne(details, {$set: user}, (err, result) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -33,7 +33,7 @@ module.exports = function(app, db) {
     app.get('/users/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
-        db.collection('users').findOne(details, (err, item) => {
+        db.collection('user').findOne(details, (err, item) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -42,9 +42,21 @@ module.exports = function(app, db) {
         });
     });
 
+    // Jens Sels - Ophalen van alle opdrachten van een user
+    app.get('/users/:id/opdrachten', (req, res) => {
+        const id = req.params.id;
+        db.collection('opdracht').find({'userId': id}).sort({datumInzending: -1} ).toArray((err, items) => {
+            if (err) {
+                res.send({'error':'An error has occurred'});
+            } else {
+                res.send(items);
+            }
+        });
+    });
+
     // Jens Sels - Ophalen van alle users
     app.get('/users/', (req, res) => {
-        db.collection('users').find({}).toArray((err, items) => {
+        db.collection('user').find({}).toArray((err, items) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
@@ -57,7 +69,7 @@ module.exports = function(app, db) {
     app.post('/users', (req, res) => {
         const user = { naam: req.body.naam, email: req.body.email, wachtwoord: req.body.wachtwoord, adminNiveau: req.body.adminNiveau };
 
-        db.collection('users').insert(user, (err, result) => {
+        db.collection('user').insert(user, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
@@ -73,7 +85,7 @@ module.exports = function(app, db) {
 
         const details = {'email' : email, 'wachtwoord': wachtwoord};
 
-        db.collection('users').findOne(details, (err, item) => {
+        db.collection('user').findOne(details, (err, item) => {
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
