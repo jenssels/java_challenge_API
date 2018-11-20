@@ -15,10 +15,15 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                const token = jwt.sign({ id: item._id, adminNiveau: item.adminNiveau }, config.secret, {
-                    expiresIn: 86400
-                });
-                res.send({token: token, user: item});
+                if (item != null){
+                    const token = jwt.sign({ id: item._id, adminNiveau: item.adminNiveau }, config.secret, {
+                        expiresIn: 86400
+                    });
+                    res.send({token: token, user: item});
+                }
+                else{
+                    res.send({user: item})
+                }
             }
         });
     });
