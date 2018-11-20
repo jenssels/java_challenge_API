@@ -71,6 +71,19 @@ module.exports = function(app, db) {
         });
     });
 
+    // Jens Sels - Ophalen van alle transacties van een user
+    app.get('/users/:id/transacties', (req, res) => {
+        const id = req.params.id;
+        const params = {'userId': id};
+        db.collection('transactie').find(params).sort({datum: -1} ).toArray((err, items) => {
+            if (err) {
+                res.send({'error':'An error has occurred ' + err});
+            } else {
+                res.send(items);
+            }
+        });
+    });
+
     // Jens Sels - Ophalen van alle users
     app.get('/users/', (req, res) => {
         db.collection('user').find({}).toArray((err, items) => {
