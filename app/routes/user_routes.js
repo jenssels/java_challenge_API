@@ -8,7 +8,7 @@ module.exports = function(app, db) {
         const details = { '_id': new ObjectId(id) };
         db.collection('user').deleteOne(details, (err, item) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send('User ' + id + ' deleted!');
             }
@@ -19,10 +19,23 @@ module.exports = function(app, db) {
     app.put('/users/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
-        const user = { naam: req.body.naam, email: req.body.email, wachtwoord: req.body.wachtwoord, adminNiveau: req.body.adminNiveau };
-        db.collection('user').updateOne(details, {$set: user}, (err, result) => {
+        const params = {};
+        if (req.body.naam != null){
+            params['naam'] = req.body.naam;
+        }
+        if (req.body.email){
+            params['email'] = req.body.email;
+        }
+        if (req.body.wachtwoord){
+            params['wachtwoord'] = req.body.wachtwoord;
+        }
+        if (req.body.adminNiveau != null){
+            params['adminNiveau'] = req.body.adminNiveau;
+        }
+
+        db.collection('user').updateOne(details, {$set: params}, (err, result) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send('OK');
             }
@@ -35,7 +48,7 @@ module.exports = function(app, db) {
         const details = { '_id': new ObjectId(id) };
         db.collection('user').findOne(details, (err, item) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send(item);
             }
@@ -47,7 +60,7 @@ module.exports = function(app, db) {
         const id = req.params.id;
         db.collection('opdracht').find({'userId': id}).sort({datumInzending: -1} ).toArray((err, items) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send(items);
             }
@@ -58,7 +71,7 @@ module.exports = function(app, db) {
     app.get('/users/', (req, res) => {
         db.collection('user').find({}).toArray((err, items) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send(items);
             }
@@ -69,9 +82,9 @@ module.exports = function(app, db) {
     app.post('/users', (req, res) => {
         const user = { naam: req.body.naam, email: req.body.email, wachtwoord: req.body.wachtwoord, adminNiveau: req.body.adminNiveau };
 
-        db.collection('user').insert(user, (err, result) => {
+        db.collection('user').insertOne(user, (err, result) => {
             if (err) {
-                res.send({ 'error': 'An error has occurred' });
+                res.send({ 'error': 'An error has occurred ' + err });
             } else {
                 res.send(result.ops[0]);
             }
@@ -87,7 +100,7 @@ module.exports = function(app, db) {
 
         db.collection('user').findOne(details, (err, item) => {
             if (err) {
-                res.send({'error':'An error has occurred'});
+                res.send({'error':'An error has occurred ' + err});
             } else {
                 res.send(item);
             }
