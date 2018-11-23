@@ -103,7 +103,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('User ' + id + ' deleted!');
+                res.send({ message: 'User ' + id + ' deleted!' });
             }
         });
     });
@@ -130,7 +130,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('OK');
+                res.send({ message: 'OK' });
             }
         });
     });

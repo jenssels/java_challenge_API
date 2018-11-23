@@ -102,7 +102,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('OK');
+                res.send({message: 'OK'});
             }
         });
     });
@@ -115,7 +115,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('Reward ' + id + ' deleted!');
+                res.send({message: 'Reward ' + id + ' deleted!'});
             }
         });
     });

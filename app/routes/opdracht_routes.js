@@ -130,7 +130,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('OK');
+                res.send({message: 'OK'});
             }
         });
     });
@@ -143,7 +143,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('Opdracht ' + id + ' deleted!');
+                res.send({message: 'Opdracht ' + id + ' deleted!'});
             }
         });
     });
@@ -164,7 +164,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred' + err});
             } else {
-                res.send('OK');
+                res.send({message: 'OK'});
             }
         });
     });
@@ -203,7 +203,7 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
             } else {
-                res.send('Opdracht type ' + id + ' deleted!');
+                res.send({message: 'Opdracht type ' + id + ' deleted!'});
             }
         });
     });
