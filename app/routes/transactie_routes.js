@@ -2,21 +2,37 @@ const ObjectId       = require('mongodb').ObjectID;
 const config         = require('../../config/config');
 const jwt            = require('jsonwebtoken');
 
+// Jens Sels - Middleware die checkt of er een valid token is meegegeven
+const loginGuard = function(req, res, next) {
+    const token = req.headers['x-access-token'];
+    if (!token) return res.status(401).send({ message: 'No token provided.' });
+
+    jwt.verify(token, config.secret, function(err, decoded) {
+        if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
+    });
+    next();
+};
+// Jens Sels - Middleware die checkt of de token valid is en dat de gebruiker een admin is
+const adminGuard = function(req, res, next) {
+    const token = req.headers['x-access-token'];
+    if (!token) return res.status(401).send({ message: 'No token provided.' });
+
+    jwt.verify(token, config.secret, function(err, decoded) {
+        if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
+        if (parseInt(decoded.adminNiveau) < 1) {
+            return res.status(403).send({message: 'Access denied, permission not high enough.'});
+        }
+        else{
+            next();
+        }
+    });
+};
+
 module.exports = function(app, db) {
 
-    // Jens Sels - Middleware die checkt of er een valid token is meegegeven
-    app.use(function(req, res, next) {
-        const token = req.headers['x-access-token'];
-        if (!token) return res.status(401).send({ message: 'No token provided.' });
-
-        jwt.verify(token, config.secret, function(err, decoded) {
-            if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
-        });
-        next();
-    });
 
     // Jens Sels - Ophalen van alle transacties
-    app.get('/transacties/', (req, res) => {
+    app.get('/transacties/', loginGuard, (req, res) => {
         const validOrderBy = ['aantalPunten','datum'];
         const validOrderDirection = ['ASC', 'DESC'];
         const orderBy = req.query.orderBy;
@@ -39,7 +55,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Ophalen van transactie where Id
-    app.get('/transacties/:id', (req, res) => {
+    app.get('/transacties/:id', loginGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         db.collection('transactie').findOne(details, (err, item) => {
@@ -52,7 +68,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Transactie toevoegen
-    app.post('/transacties/', (req, res) => {
+    app.post('/transacties/', loginGuard, (req, res) => {
         const transactie = { userId: req.body.userId, rewardId: req.body.rewardId, aantalPunten: req.body.aantalPunten, datum: req.body.datum };
         db.collection('transactie').insertOne(transactie, (err, result) => {
             if (err) {
@@ -63,21 +79,9 @@ module.exports = function(app, db) {
         });
     });
 
-    // Jens Sels - Middleware die checkt of de gebruiker genoeg permissions heeft
-    app.use(function(req, res, next) {
-        const token = req.headers['x-access-token'];
-        jwt.verify(token, config.secret, function(err, decoded) {
-            if (parseInt(decoded.adminNiveau) < 1) {
-                return res.status(403).send({message: 'Access denied, permission not high enough.'});
-            }
-            else{
-                next();
-            }
-        });
-    });
 
     // Jens Sels - Update een transactie
-    app.put('/transacties/:id', (req, res) => {
+    app.put('/transacties/:id', adminGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         const params = {};
@@ -104,7 +108,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Verwijderen van transactie where Id
-    app.delete('/transacties/:id', (req, res) => {
+    app.delete('/transacties/:id', adminGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         db.collection('transactie').deleteOne(details, (err, item) => {

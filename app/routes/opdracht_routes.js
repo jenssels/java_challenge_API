@@ -2,21 +2,37 @@ const ObjectId       = require('mongodb').ObjectID;
 const config         = require('../../config/config');
 const jwt            = require('jsonwebtoken');
 
+// Jens Sels - Middleware die checkt of er een valid token is meegegeven
+const loginGuard = function(req, res, next) {
+    const token = req.headers['x-access-token'];
+    if (!token) return res.status(401).send({ message: 'No token provided.' });
+
+    jwt.verify(token, config.secret, function(err, decoded) {
+        if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
+    });
+    next();
+};
+// Jens Sels - Middleware die checkt of de token valid is en dat de gebruiker een admin is
+const adminGuard = function(req, res, next) {
+    const token = req.headers['x-access-token'];
+    if (!token) return res.status(401).send({ message: 'No token provided.' });
+
+    jwt.verify(token, config.secret, function(err, decoded) {
+        if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
+        if (parseInt(decoded.adminNiveau) < 1) {
+            return res.status(403).send({message: 'Access denied, permission not high enough.'});
+        }
+        else{
+            next();
+        }
+    });
+};
+
 module.exports = function(app, db) {
 
-    // Jens Sels - Middleware die checkt of er een valid token is meegegeven
-    app.use(function(req, res, next) {
-        const token = req.headers['x-access-token'];
-        if (!token) return res.status(401).send({ message: 'No token provided.' });
-
-        jwt.verify(token, config.secret, function(err, decoded) {
-            if (err) return res.status(500).send({message: 'Failed to authenticate token.'});
-        });
-        next();
-    });
 
     // Jens Sels - Ophalen van opdracht where id
-    app.get('/opdrachten/:id', (req, res) => {
+    app.get('/opdrachten/:id', loginGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         db.collection('opdracht').findOne(details, (err, item) => {
@@ -29,7 +45,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Ophalen van alle opdracht types
-    app.get('/opdrachtTypes/', (req, res) => {
+    app.get('/opdrachtTypes/', loginGuard, (req, res) => {
         db.collection('opdrachtType').find({}).toArray((err, items) => {
             if (err) {
                 res.send({'error':'An error has occurred ' + err});
@@ -40,7 +56,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Ophalen van een opdracht type
-    app.get('/opdrachtTypes/:id', (req, res) => {
+    app.get('/opdrachtTypes/:id', loginGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         db.collection('opdrachtType').findOne(details, (err, item) => {
@@ -53,7 +69,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Opdracht toevoegen
-    app.post('/opdrachten', (req, res) => {
+    app.post('/opdrachten', loginGuard, (req, res) => {
         const opdracht = { titel: req.body.titel, beschrijving: req.body.beschrijving, datumInzending: req.body.datumInzending, userId: req.body.userId, opdrachtTypeId: req.body.opdrachtTypeId, aantalPunten: req.body.aantalPunten, isGoedgekeurd: req.body.isGoedgekeurd, datumGoedgekeurd: req.body.datumGoedgekeurd };
         db.collection('opdracht').insertOne(opdracht, (err, result) => {
             if (err) {
@@ -65,22 +81,9 @@ module.exports = function(app, db) {
     });
 
 
-    // Jens Sels - Middleware die checkt of de gebruiker genoeg permissions heeft
-    app.use(function(req, res, next) {
-        const token = req.headers['x-access-token'];
-        jwt.verify(token, config.secret, function(err, decoded) {
-            if (parseInt(decoded.adminNiveau) < 1) {
-                return res.status(403).send({message: 'Access denied, permission not high enough.'});
-            }
-            else{
-                next();
-            }
-        });
-    });
-
 
     // Jens Sels - Ophalen van alle opdrachten
-    app.get('/opdrachten/', (req, res) => {
+    app.get('/opdrachten/', loginGuard, (req, res) => {
         const params = {};
         if (req.query.isGoedgekeurd != null){
             params['isGoedgekeurd'] =  req.query.isGoedgekeurd;
@@ -97,7 +100,7 @@ module.exports = function(app, db) {
     
 
     // Jens Sels - Bewerken van opdracht
-    app.put('/opdrachten/:id', (req, res) => {
+    app.put('/opdrachten/:id', adminGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         const params = {};
@@ -136,7 +139,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Verwijderen van opdracht where id
-    app.delete('/opdrachten/:id', (req, res) => {
+    app.delete('/opdrachten/:id', adminGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         db.collection('opdracht').deleteOne(details, (err, item) => {
@@ -149,7 +152,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Bewerken van opdracht Type
-    app.put('/opdrachtTypes/:id', (req, res) => {
+    app.put('/opdrachtTypes/:id', adminGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         const params = {};
@@ -170,7 +173,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - OpdrachtType toevoegen
-    app.post('/opdrachtTypes', (req, res) => {
+    app.post('/opdrachtTypes', adminGuard, (req, res) => {
         const opdrachtType = { naam: req.body.naam, aantalPunten: req.body.aantalPunten };
 
         db.collection('opdrachtType').insertOne(opdrachtType, (err, result) => {
@@ -184,7 +187,7 @@ module.exports = function(app, db) {
 
 
     // Jens Sels - Ophalen van alle opdrachten van een bepaalde opdracht Type
-    app.get('/opdrachtTypes/:id/opdrachten', (req, res) => {
+    app.get('/opdrachtTypes/:id/opdrachten', adminGuard, (req, res) => {
         const id = req.params.id;
         db.collection('opdracht').find({'opdrachtTypeId': id}).sort({datumInzending: -1} ).toArray((err, items) => {
             if (err) {
@@ -196,7 +199,7 @@ module.exports = function(app, db) {
     });
 
     // Jens Sels - Verwijderen van opdracht Type
-    app.delete('/opdrachtTypes/:id', (req, res) => {
+    app.delete('/opdrachtTypes/:id', adminGuard, (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectId(id) };
         db.collection('opdrachtType').deleteOne(details, (err, item) => {
