@@ -37,6 +37,7 @@ module.exports = function(app, db) {
         const wachtwoord = req.body.wachtwoord;
 
         const details = {'email' : email, 'wachtwoord': wachtwoord};
+        console.log(req.body);
 
         db.collection('user').findOne(details, (err, item) => {
             if (err) {

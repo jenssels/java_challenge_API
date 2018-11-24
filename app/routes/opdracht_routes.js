@@ -123,7 +123,7 @@ module.exports = function(app, db) {
             params['aantalPunten'] = req.body.aantalPunten;
         }
         if (req.body.isGoedgekeurd != null){
-            params['isGoedgekeurd'] = req.body.isGoedgekeurd === "true";
+            params['isGoedgekeurd'] = req.body.isGoedgekeurd;
         }
         if (req.body.datumGoedgekeurd != null){
             params['datumGoedgekeurd'] = req.body.datumGoedgekeurd;
